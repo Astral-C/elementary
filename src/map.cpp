@@ -10,7 +10,9 @@
 #include "tonc_memmap.h"
 #include "tonc_oam.h"
 #include "tonc_types.h"
+#include "tonc_video.h"
 #include "worldmap_0_tileset.png.h"
+#include "water_tile_anim.png.h"
 #include "player_worldmap.png.h"
 
 namespace WorldMap {
@@ -23,6 +25,7 @@ namespace WorldMap {
 
     u32 mFadeAlpha { 32 };
     u32 mTime { 0 };
+    u32 mTilesetFrame { 0 };
     bool mMoving { false };
 
     u32 mBGOffset[2] { 0, 0 };
@@ -52,7 +55,6 @@ namespace WorldMap {
 
         memcpy32(&tile_mem[0][0], worldmap_0_tileset_pngTiles, worldmap_0_tileset_pngTilesLen / 4);
         memcpy32(&pal_bg_bank[0][0], worldmap_0_tileset_pngPal, worldmap_0_tileset_pngPalLen / 4);
-
         //memcpy32(&se_mem[27][0], worldmap_0_pngMap, worldmap_0_pngMapLen / 4);
 
         u16* blocks[4] = { &se_mem[27][0], &se_mem[28][0], &se_mem[29][0], &se_mem[30][0] };
@@ -192,7 +194,12 @@ namespace WorldMap {
         
         obj_set_pos(&mSprites[PLAYER], mPlayerPos[0], mPlayerPos[1] + (lu_sin(mTime << 9) >> 10));
         if((mTime % 30) == 0) mSprites[PLAYER].attr2 = ATTR2_BUILD((mSprites[PLAYER].attr2 & ATTR2_ID_MASK) == 5 ? 1 : 5, 0, 0);
-
+        if((mTime % 10) == 0){
+            memcpy32(&tile_mem[0][12], water_tile_anim_pngTiles + (32 * mTilesetFrame), 32); // 4 tiles = 32 words
+            memcpy32(&tile_mem[0][16], water_tile_anim_pngTiles + (32 * mTilesetFrame), 32);
+            mTilesetFrame = (mTilesetFrame + 1) % 4;
+        }
+        
         REG_BG0VOFS = mBGOffset[1];
         REG_BG0HOFS = mBGOffset[0];
         oam_copy(oam_mem, mSprites, 10);
