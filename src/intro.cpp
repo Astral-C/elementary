@@ -51,7 +51,7 @@ namespace Splash {
         }
     };
     
-    EWRAM_DATA mm_sfxhand CardEffectHandle;
+    mm_sfxhand CardEffectHandle;
     
     void Init(){
         memcpy(&se_mem[24][0], Cards[mScreen].mMap, Cards[mScreen].mMapLen);
@@ -85,7 +85,8 @@ namespace Splash {
             case 1:
                 Cards[mScreen].mTime--;
                 if(Cards[mScreen].mTime == 0){
-                    mmEffectCancel(CardEffectHandle);
+                    mmEffectRelease(CardEffectHandle);
+                    //mmEffectCancel(CardEffectHandle);
                     mStage = 2;
                 }
                 break;

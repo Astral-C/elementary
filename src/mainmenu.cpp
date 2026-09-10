@@ -23,6 +23,7 @@
 #include "tonc_oam.h"
 #include "tonc_types.h"
 #include "tonc_video.h"
+#include "map.hpp"
 
 namespace MainMenu {
     enum OBJ {
@@ -33,7 +34,7 @@ namespace MainMenu {
         MENU_OBJ_MAX
     };
     
-    OBJ_ATTR mSprites[MENU_OBJ_MAX] {};
+    OBJ_ATTR mSprites[128] {};
     u16 mCursorPositions[2][2]{
         { 94, 104 },
         { 94, 124 },
@@ -48,8 +49,7 @@ namespace MainMenu {
     s8 mFadeAlpha { 32 };
     
     void Init(){
-        OAM_CLEAR();
-    
+        oam_init(mSprites, 128);
         REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_BG3;
 
         REG_BG0CNT = BG_BUILD(0, 27, BG_REG_32x32, BG_4BPP, 1, 0, 0);
@@ -91,7 +91,7 @@ namespace MainMenu {
 
         mmSetModuleVolume(128);
         mmSetEffectsVolume(1024);
-        mmStart(MOD_CLOUDBERRY_FIELDS, MM_PLAY_LOOP);
+        mmStart(MOD_RASPBERRY_JAM, MM_PLAY_LOOP);
     }
     
     void Update(){
@@ -125,9 +125,10 @@ namespace MainMenu {
 
         if(key_hit(KEY_A) || key_hit(KEY_START)){
             if(mCursorIndex == 0){
-                GameState::ChangeState(GameState::MAP);
                 mmStop();
                 mmEffect(SFX_MENU_SELECT);
+                WorldMap::SetWorld(0);
+                GameState::ChangeState(GameState::MAP);
             }
         }
 
@@ -137,6 +138,6 @@ namespace MainMenu {
         REG_BG3HOFS = -(mTime >> 3);
         
         mTime++;
-        oam_copy(oam_mem, mSprites, MENU_OBJ_MAX);
+        oam_copy(oam_mem, mSprites, 128);
     }
 }

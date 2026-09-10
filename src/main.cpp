@@ -15,17 +15,15 @@ int main(void) {
     irq_enable(II_VBLANK);
     irq_add(II_VBLANK, mmVBlank);
     
-    mmInitDefault((mm_addr)soundbank_bin, 16);
-
+    mmInitDefault((mm_addr)soundbank_bin, 32);    
     SaveManager::Read();
 
     GameState::ChangeState(GameState::SPLASH);
     
     while (1) {
         VBlankIntrWait();
-        mmFrame();
-        
         GameState::UpdateState();
+        mmFrame();
     }
     mgba_close();
 }

@@ -8,7 +8,7 @@ namespace SaveManager {
         u32 Magic { 'ELEM' };
         u8 HasSave { 0 };
         u8 UnlockedWorldCount { 0 };
-        u8 Flags[100];
+        u8 Flags[100] { 0 };
     } SaveFile;
     
     void SetFlag(u32 idx, u8 val);

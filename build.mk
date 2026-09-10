@@ -70,6 +70,8 @@ ALLFLAGS += \
 	-mcpu=arm7tdmi \
 	-mabi=aapcs \
 	-mfloat-abi=soft \
+	-Wimplicit-fallthrough \
+	--embed-dir=$(CURDIR)/maps \
 	$(LIBDIRS:%=-I%/include) \
 	$(INCLUDES:%=-iquote %) \
 	$(if $(USE_LTO),-flto,-fno-lto) \
