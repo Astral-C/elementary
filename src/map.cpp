@@ -78,13 +78,11 @@ namespace WorldMap {
                 }
             }
         }
-        mmStart(MOD_PIANO_CHANNEL, MM_PLAY_LOOP);
+        mmStart(MOD_YEAR2014, MM_PLAY_LOOP);
     }
 
     void OnExitBoard(){
         mBoardExit = true;
-        mTransHeight = 80;
-        REG_WIN0V = 80 << 8 | 80;
     }
 
     void Update(){

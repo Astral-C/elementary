@@ -32,24 +32,25 @@ namespace Board {
         TILE_MAX
     };
     
-    int mTransHeight { 80 };
-    bool mBoardComplete { false } , mBoardEnter { false }, mBoardExit { false }, mHelpOpen { false };
     u32 mLitTorches { 0 };
+    s32 mBGOffset[2] { 0, 0 };
+    bool mBoardComplete { false } , mBoardEnter { false }, mBoardExit { false }, mHelpOpen { false };
     
-    int mPlayerElement { 0 };
-    int mPlayerFrame { 0 };
     OBJ_ATTR mSprites[128];
 
-    u32 mBGOffset[2] { 0, 0 };
-    u32 mPlayerPos[2] { 0, 0 };
+    int mPlayerFrame { 0 };
+    int mPlayerElement { 0 };
+    u32 mElementRemaining { 0 };
+    s32 mPlayerPos[2] { 0, 0 };
     s32 mMoveDir[2] { 0, 0 };
     u32 mMoveTimer { 16 };
 
     bool mMoving { false };
     u32 mTimer { 0 };
 
+
+    int mTransHeight { 80 };
     u32 mResetWait { 0 };
-    u32 mElementRemaining { 0 };
     
     const BoardDef* mCurrentBoard { &Boards[0] };
     u8 CurrentBoardCol[1024] { 0 };
@@ -81,8 +82,8 @@ namespace Board {
         mBGOffset[0] = (mCurrentBoard->SpawnX << 4) - (SCR_W >> 1) - 8;
         mBGOffset[1] = (mCurrentBoard->SpawnY << 4) - (SCR_H >> 1) - 8;
 
-        REG_BG0HOFS = max(mBGOffset[0], 0);
-        REG_BG0VOFS = min(mBGOffset[1], 512 - 240);
+        REG_BG0HOFS = mBGOffset[0];
+        REG_BG0VOFS = mBGOffset[1];
         
         mBoardComplete = false;
         mHelpOpen = false;
@@ -130,10 +131,13 @@ namespace Board {
     void Init(){
         oam_init(mSprites, 128);
         oam_copy(oam_mem, mSprites, 128);
-        mBoardComplete = false;
+
         SaveManager::SetFlag(mCurrentBoard->FlagOnComplete, 0);
-        mBoardEnter = true;
+
         mTransHeight = 80;
+        mBoardEnter = true;
+        mBoardComplete = false;
+
         REG_DISPCNT = DCNT_MODE0 | DCNT_OBJ | DCNT_OBJ_1D | DCNT_BG0 | DCNT_WIN0 | DCNT_BG1;
         REG_BG1CNT = BG_CBB(1) | BG_SBB(26) | BG_REG_32x32 | BG_4BPP | BG_PRIO(0);
         REG_BG2CNT = BG_CBB(1) | BG_SBB(25) | BG_REG_32x32 | BG_4BPP | BG_PRIO(1);
@@ -153,9 +157,11 @@ namespace Board {
         memcpy32(&tile_mem[0][0], mCurrentBoard->BoardTiles, mCurrentBoard->BoardTilesLen / 4);
         memcpy32(&pal_bg_bank[0][0], mCurrentBoard->BoardPal, mCurrentBoard->BoardPalLen / 4);
         memcpy32(&tile_mem_obj[0][1], plyr_pngTiles, plyr_pngTilesLen / 4);
+        Reset();
 
         memset16(&se_mem[25][0], SE_BUILD(95, 2, 0, 0), 1024);
 
+        // Setup help menu bgs
         pal_bg_bank[2][1] = CLR_BLACK;
         tile_mem[1][95] = {
             0x11111111, 0x11111111, 0x11111111, 0x11111111,
@@ -163,7 +169,6 @@ namespace Board {
         };
         tte_write("#{P:168,158}Help: L");
         
-        Reset();
         mmStart(MOD_BLUE_INTERMISSION, MM_PLAY_LOOP);
     }
     
@@ -221,6 +226,7 @@ namespace Board {
                 switch (mPlayerElement) {
                     case PLAYER_WATER:
                         mPlayerElement = PLAYER_ICE;
+                        mElementRemaining = 16;
                     default:
                         mMoving = true;
                         break;
@@ -282,6 +288,7 @@ namespace Board {
                 mTransHeight = 0;
                 REG_WIN0V = 160;
                 REG_DISPCNT |= DCNT_WIN0;
+                mmEffect(SFX_WIN);
                 SaveManager::SetFlag(mCurrentBoard->FlagOnComplete, 1);
                 WorldMap::OnExitBoard();
                 break;
@@ -325,11 +332,11 @@ namespace Board {
             mTransHeight += 8;
             return;
         } else if(mBoardExit) {
+            REG_WIN0V = 80 << 8 | 80;
             if(mBoardComplete){
                 mmStop();
                 GameState::ChangeState(GameState::MAP);
             } else {
-                REG_WIN0V = 80 << 8 | 80;
                 Reset();
                 mResetWait = 30;
                 mBoardEnter = true;
@@ -339,14 +346,12 @@ namespace Board {
         }
 
         if(!mMoving && key_hit(KEY_R)){
+            REG_WIN0V = 160;
             REG_DISPCNT |= DCNT_WIN0;
             mBoardExit = true;
             return;
         }
-        
-        //if(key_hit(KEY_A)){
-        //    mPlayerElement = (mPlayerElement + 1) % 4;
-        //}
+
         if(key_hit(KEY_L) && !mHelpOpen){
             tte_erase_rect(168, 158, 240, 160);
             tte_write("#{P:32,8}Light all the fire pits!\
@@ -363,6 +368,7 @@ namespace Board {
             mSprites[0].attr0 &= ~ATTR0_BLEND;
             tte_erase_rect(0, 0, 240, 160);
             tte_write("#{P:168,158}Help: L");
+            mmEffect(SFX_MENU_SELECT);
             mHelpOpen = false;
         }
 

@@ -23,17 +23,17 @@ namespace WorldMap {
         {
             .x = 17,
             .y = 24,
-            .LevelID = 3
+            .LevelID = 0
         },
         {
             .x = 26,
             .y = 6,
-            .LevelID = 4
+            .LevelID = 0
         },
         {
             .x = 26,
             .y = 17,
-            .LevelID = 5
+            .LevelID = 0
         },
     };
 

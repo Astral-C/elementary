@@ -17,11 +17,11 @@ namespace Splash {
     u8 mAlpha = 32;
     u8 mStage = 0;
     u8 mScreen = 0;
-    u8 mCardCount = 3;
-    Screen Cards[3] = {
+    u8 mCardCount = 2;
+    Screen Cards[2] = {
         {
-            .mTime = 125,
-            .mSFX = SFX_WOW,
+            .mTime = 240,
+            .mSFX = SFX_DEV_SPLASH,
             .mTiles = title_pngTiles,
             .mPalette = title_pngPal,
             .mMap = title_pngMap,
@@ -30,18 +30,8 @@ namespace Splash {
             .mMapLen = splash_pngMapLen
         },
         {
-            .mTime = 220,
-            .mSFX = SFX_SQUEAK,
-            .mTiles = splash_pngTiles,
-            .mPalette = splash_pngPal,
-            .mMap = splash_pngMap,
-            .mTilesLen = splash_pngTilesLen,
-            .mPaletteLen = splash_pngPalLen,
-            .mMapLen = splash_pngMapLen
-        },
-        {
             .mTime = 125,
-            .mSFX = SFX_GBA_DING,
+            .mSFX = SFX_JAM_SPLASH,
             .mTiles = jamsplash_pngTiles,
             .mPalette = jamsplash_pngPal,
             .mMap = jamsplash_pngMap,
